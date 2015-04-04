@@ -6,6 +6,14 @@ library(multcomp)
 library(ggplot2)
 
 shinyServer(function(input, output) {
+
+  mytheme <- theme_gray(base_size = 12, base_family = "Helvetica") + 
+    theme(
+          text = element_text(size = 14),
+          axis.text = element_text(size = 12),
+          axis.title.x = element_text(size = 14, face = "bold", vjust = 0),
+          axis.title.y = element_text(size = 14, face = "bold", vjust = 1),
+          legend.key = element_blank())
   
 sim_negbin <- function(N, mu, theta, nsims){
   Nj     <- rep(N, times = 6)                # 6 groups
@@ -144,11 +152,12 @@ plot_power <- function(z){
   out <- ggplot(z) +
     geom_line(aes(y = power, x = N, group = variable, linetype = variable)) +
     geom_point(aes(y = power, x = N, shape = variable), color = 'black', size = 4) +
+    geom_hline(aes(yintercept = 0.8), linetype = 'dotted') +
     # axes
     labs(x = 'N', 
          y = expression(paste('Power (global test , ', alpha, ' = 0.05)'))) +
-#     # appearance
-#     mytheme + 
+    # appearance
+    mytheme + 
     # legend title
     scale_shape_manual('Method', values = c(16, 2, 4), 
                        labels = c('LM', expression(GLM[nb]), expression(GLM[qp]))) +
@@ -191,13 +200,14 @@ foo <- function(N, ctrl, nsims, theta, effsize){
   out <- list(meta = todo, res = res)
   return(out)
 }
-# 
+
 # res <- foo(N = c(3, 6 , 9),
 #            ctrl = 16,
 #            nsims = 10,
 #            theta  <- rep(4, 6),
 #            effsize = 0.5)
 # pow <- list(pow = ldply(res$res, get_power), meta = res$meta)
+# pow$meta[rep(seq_len(nrow(pow$meta)), each=3),]
 # print(plot_power(pow))
   
 
@@ -210,13 +220,39 @@ foo <- function(N, ctrl, nsims, theta, effsize){
                          effsize = input$effsize)
     })
   
-  plotInput <- reactive(function() {
+  get_data <- reactive(function() {
     pow <- list(pow = ldply(mydata()$res, get_power), meta = mydata()$meta)
-    print(plot_power(pow))
+    return(pow)
   })
   
   output$powplot <- renderPlot({
-    input$goButton
-    print(plotInput())
+    print(plot_power(get_data()))
     })
+  
+  output$powtable <- renderDataTable({
+    df <- cbind(get_data()$pow, get_data()$meta[rep(seq_len(nrow(get_data()$meta)), each = 3), ])
+    df <- df[ , -5]
+    names(df) <- c('Model', 'Power', 'Convergence', 'N')
+    df}, 
+    options = list(paging = FALSE, searching = FALSE)
+    )
+  
+  #   Show the Download handler:
+  output$downloadData <- downloadHandler(
+    filename = function() 'test.csv', 
+    content = function(file) {
+      outdata <- cbind(get_data()$pow, get_data()$meta[rep(seq_len(nrow(get_data()$meta)), each = 3), ])
+      write.csv(outdata, file)
+    }
+    )
+  
+  output$downloadPlot <- downloadHandler(
+    filename = 'plot.pdf',
+    content = function(file) {
+      pdf(file)
+      print(plot_power(get_data()))
+      dev.off()
+    }
+  )
+  
 })

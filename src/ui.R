@@ -6,24 +6,29 @@ library(ggplot2)
 shinyUI(pageWithSidebar(
   
   #  Application title
-  headerPanel("Ecotox power estimation"),
+  headerPanel("Power estimation for mesocosm studies (population level)"),
   
   # Sidebar with sliders that demonstrate various available options
   sidebarPanel(
     sliderInput("nsims", "Number of simulations:", 
-                min = 50, max = 500, value = 50, step = 50),
-    sliderInput("muc", "Abundance in Control", value = 10,
+                min = 50, max = 250, value = 50, step = 50),
+    sliderInput("muc", "Abundance in Control:", value = 10,
                  min = 1, max = 500, step = 5),
-    sliderInput('effsize', 'Abundance in Treatment (as proportion of control)',
+    sliderInput('effsize', 'Abundance in Treatment (as proportion of control):',
                  value = 0.5, min = 0, max = 1, step = 0.1),
-    textInput('N', 'Sample sizes (separated by comma or space',
+    sliderInput('theta', 'Theta (=dispersion parameter): ', 
+                value = 4, min = 1, max = 25, step = 1),
+    textInput('N', 'Sample sizes (separated by comma or space): ',
               '3, 6, 9'),
-    actionButton("goButton", "Go!")
+    actionButton("goButton", "Run Simulation!")
   ),
   
   # Show a table summarizing the values entered
   mainPanel(
-    plotOutput("powplot")
+    plotOutput("powplot"),
+    dataTableOutput("powtable"),
+    downloadButton('downloadData', 'Download dataset'),
+    downloadButton('downloadPlot', 'Download Plot')
   )
 )
 ) 
