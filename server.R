@@ -1,7 +1,6 @@
 library(shiny)
 library(plyr)
 library(reshape2)
-library(MASS)
 library(multcomp)
 library(ggplot2)
 
@@ -81,27 +80,12 @@ shinyServer(function(input, output) {
       # gaussian
       modlm <- lm(yt ~ x, data = df)
       modlm.null <- lm(yt ~ 1, data = df)
-      # negative binomial 
-      modglm <- try(glm.nb(y ~ x, data = df), silent = TRUE)
-      modglm.null <- try(glm.nb(y ~ 1, data = df), silent = TRUE)
       # quasipoisson (to tackle down convergence problems)
       modqglm <- glm(y ~ x, data = df, family = 'quasipoisson')
       modqglm.null <-  glm(y ~ 1, data = df, family = 'quasipoisson')
       
       # ------------- 
       # Test of effects
-      # check convergence
-      if (inherits(modglm, "try-error") | inherits(modglm.null, "try-error")) {
-        p_glm_lr <- 'convergence error'
-        p_glm_lrpb <- 'convergence error'
-      } else {
-        if (!is.null(modglm[['th.warn']]) | !is.null(modglm.null[['th.warn']])) {
-          p_glm_lr <- 'convergence error'
-          p_glm_lrpb <- 'convergence error'
-        } else {
-          p_glm_lr <- anova(modglm, modglm.null, test = 'Chisq')[2 , 'Pr(Chi)']
-        }
-      }
       # F Tests
       p_lm_f <- anova(modlm, modlm.null, test = 'F')[2, 'Pr(>F)']
       p_qglm_f <- anova(modqglm, modqglm.null, test = 'F')[2, 'Pr(>F)']
@@ -113,49 +97,41 @@ shinyServer(function(input, output) {
 #       suppressWarnings( # intended warnings about no min -> no LOEC
 #         loeclm <- min(which(mc_lm < 0.05))
 #       )
-#       # negbin
-#       if (inherits(modglm, "try-error")) {
-#         loecglm <- 'convergence error'
-#       } else {
-#         if (!is.null(modglm[['th.warn']])) {
-#           loecglm <- 'convergence error'
-#         } else {
-#           mc_glm <- summary(glht(modglm, linfct = mcp(x = 'Dunnett'),  
-#                                  alternative = 'less'), test = adjusted('holm'))$test$pvalues
-#           suppressWarnings(
-#             loecglm <- min(which(mc_glm  < 0.05))
-#           )
-#         }
-#       }
 #       # quasi
 #       mc_qglm <- summary(glht(modqglm, linfct = mcp(x = 'Dunnett'),  
 #                               alternative = 'less'), test = adjusted('holm'))$test$pvalues
 #       suppressWarnings( # intended warnings about no min -> no LOEC
 #         loecqglm <- min(which(mc_qglm < 0.05))
 #       ) 
-#       
+      
       # ---------
       # return object
-      return(list(p_lm_f = p_lm_f, p_glm_lr = p_glm_lr, p_qglm_f = p_qglm_f
+      return(list(p_lm_f = p_lm_f, p_qglm_f = p_qglm_f
 #                   ,
-#                   loeclm = loeclm, loecglm = loecglm, loecqglm = loecqglm
+#                   loeclm = loeclm, loecqglm = loecqglm
       )
       )
     }
-    res <- apply(z$y, 2, ana, x = z$x)
+    withProgress(message = 'Analysing simulation', detail = "0", value = 0, {
+    res <- vector('list', ncol(z$y))
+    for (i in seq_len(ncol(z$y))) {
+      incProgress(1 / ncol(z$y), detail = i)
+      res[[i]] <- ana(z$y[ , i], z$x)
+    }
+    })
     return(res)
   }
   # res1 <- get_result(sims$sims[[1]])
   
   # exract power
   get_power <- function(z){ 
-    take <- c('p_lm_f', 'p_glm_lr', 'p_qglm_f')
+    take <- c('p_lm_f', 'p_qglm_f')
     ps <- ldply(z, function(w) as.numeric(unlist(w[take])))
     names(ps) <- take
     ps <- melt(ps)
     out <- ddply(ps, .(variable), summarize,
-                 power = sum(value < 0.05, na.rm = TRUE) / sum(!is.na(value)),
-                 conv = sum(!is.na(value)) / length(value))
+                 power = sum(value < 0.05, na.rm = TRUE) / sum(!is.na(value))
+                 )
     return(out)
   }
   # p1 <- get_power(res1)
@@ -164,9 +140,9 @@ shinyServer(function(input, output) {
   plot_power <- function(z){
     meta <- z$meta
     z <-  z$pow
-    z$N <- rep(meta, each = 3)
-    z$variable <-  factor(z$variable, unique(z$variable)[1:5], 
-                                   labels = c('lm', 'glm_nb', 'glm_qp'))
+    z$N <- rep(meta, each = 2)
+    z$variable <-  factor(z$variable, unique(z$variable)[1:2], 
+                                   labels = c('LM', 'QP'))
     
     out <- ggplot(z) +
       geom_line(aes(y = power, x = N, group = variable, linetype = variable)) +
@@ -179,9 +155,9 @@ shinyServer(function(input, output) {
       mytheme + 
       # legend title
       scale_shape_manual('Method', values = c(16, 2, 4), 
-                         labels = c('LM', expression(GLM[nb]), expression(GLM[qp]))) +
+                         labels = c('LM', 'QP')) +
       scale_linetype_discrete('Method', 
-                              labels = c('LM', expression(GLM[nb]), expression(GLM[qp]))) +
+                              labels = c('LM', 'QP')) +
       ylim(c(0, 1))
     return(out)
   }
@@ -241,11 +217,11 @@ shinyServer(function(input, output) {
     })
   
   output$powtable <- renderDataTable({
-    df <- cbind(get_data()$pow, get_data()$meta[rep(seq_along(get_data()$meta), each = 3)])
-    df$variable <-  factor(df$variable, unique(df$variable)[1:5], 
-                          labels = c('lm', 'glm_nb', 'glm_qp'))
-    df <- df[ , -5]
-    names(df) <- c('Model', 'Power', 'Convergence', 'N')
+    df <- cbind(get_data()$pow, get_data()$meta[rep(seq_along(get_data()$meta), each = 2)])
+    df$variable <-  factor(df$variable, unique(df$variable)[1:2], 
+                          labels = c('lm', 'qp'))
+    df <- df[ , -4]
+    names(df) <- c('Model', 'Power', 'N')
     df}, 
     options = list(paging = FALSE, searching = FALSE)
     )

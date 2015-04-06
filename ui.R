@@ -2,7 +2,7 @@ library(shiny)
 library(ggplot2)
 
 # Define UI for slider demo application
-shinyUI(navbarPage("Power estimation!",
+shinyUI(navbarPage("Powerapp",
           tabPanel("Design",
             sidebarLayout(
               # Sidebar with sliders that demonstrate various available options
@@ -22,7 +22,7 @@ shinyUI(navbarPage("Power estimation!",
               )
             )
           ), 
-          tabPanel("Simulation",
+          tabPanel("Power",
                    sidebarLayout(
                      sidebarPanel(
                        sliderInput("nsims", "Number of simulations:", 
