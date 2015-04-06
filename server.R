@@ -59,6 +59,8 @@ shinyServer(function(input, output) {
   
   # simulate scenarios
   sim_fun <- function(N, ctrl, theta, effsize, nsims){
+    if (length(N) > 5)
+      stop('To many N specified (max = 5)')
     sims <- vector("list", length(N)) 
     # withProgress(message = 'Generating data', detail = "Scenario 0", value = 0, {
       for (i in seq_along(N)) {
