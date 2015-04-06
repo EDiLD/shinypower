@@ -70,7 +70,7 @@ shinyServer(function(input, output) {
     # })
     return(list(sims = sims, meta = N))
   }
-  # sims <- sim_fun(5, 100, 4, 0.1, 100)
+  # sims <- sim_fun(c(5,4), 100, 4, 0.1, 100)
 
   # compare methods
   get_result <- function(z){
@@ -96,25 +96,24 @@ shinyServer(function(input, output) {
       p_lm_f <- anova(modlm, modlm.null, test = 'F')[2, 'Pr(>F)']
       p_qglm_f <- anova(modqglm, modqglm.null, test = 'F')[2, 'Pr(>F)']
       
-#       # ----------------
-#       # LOEC
-#       mc_lm <- summary(glht(modlm, linfct = mcp(x = 'Dunnett'),  
-#                             alternative = 'less'), test = adjusted('holm'))$test$pvalues
-#       suppressWarnings( # intended warnings about no min -> no LOEC
-#         loeclm <- min(which(mc_lm < 0.05))
-#       )
-#       # quasi
-#       mc_qglm <- summary(glht(modqglm, linfct = mcp(x = 'Dunnett'),  
-#                               alternative = 'less'), test = adjusted('holm'))$test$pvalues
-#       suppressWarnings( # intended warnings about no min -> no LOEC
-#         loecqglm <- min(which(mc_qglm < 0.05))
-#       ) 
+      # ----------------
+      # LOEC
+      mc_lm <- summary(glht(modlm, linfct = mcp(x = 'Dunnett'),  
+                            alternative = 'less'), test = adjusted('holm'))$test$pvalues
+      suppressWarnings( # intended warnings about no min -> no LOEC
+        loeclm <- min(which(mc_lm < 0.05))
+      )
+      # quasi
+      mc_qglm <- summary(glht(modqglm, linfct = mcp(x = 'Dunnett'),  
+                              alternative = 'less'), test = adjusted('holm'))$test$pvalues
+      suppressWarnings( # intended warnings about no min -> no LOEC
+        loecqglm <- min(which(mc_qglm < 0.05))
+      ) 
       
       # ---------
       # return object
-      return(list(p_lm_f = p_lm_f, p_qglm_f = p_qglm_f
-#                   ,
-#                   loeclm = loeclm, loecqglm = loecqglm
+      return(list(p_lm_f = p_lm_f, p_qglm_f = p_qglm_f,
+                  loeclm = loeclm, loecqglm = loecqglm
       )
       )
     }
@@ -140,12 +139,46 @@ shinyServer(function(input, output) {
                  )
     return(out)
   }
-  # p1 <- get_power(res1)
+  # z <- ldply(res2$res, get_loec)
+  #  z <- list(pow = ldply(res2$res, get_power), meta = res2$meta)
+  get_loec <- function(z){
+    take <- c("loeclm", "loecqglm")
+    loecs <- ldply(z, function(w) as.numeric(unlist(w[take])))
+    names(loecs) <- take
+    loecs <- melt(loecs)
+    out <- ddply(loecs, .(variable), summarize,
+                 power = sum(value == 2, na.rm = TRUE) / sum(!is.na(value))
+    )
+    return(out)
+  }
+  # get_loec(res1)
+  # 
+  # simulate and analyze
+  res_fun <- function(sims){
+    meta <- sims$meta
+    sims <- sims$sims
+    withProgress(message = '', detail = "N = 0", value = 0, {
+      res <- vector("list", length(sims)) 
+      for (i in seq_along(sims)) {
+        incProgress(1 / length(sims), detail = paste("N = ", meta[i]))
+        res[[i]] <- get_result(sims[[i]])
+      }
+    })
+    pow <- ldply(res, get_power)
+    loec <- ldply(res, get_loec)
+    out <- list(meta = meta, pow = pow, loec = loec)
+    return(out)
+  }
+  # res2 <- res_fun(sims)
 
   # plot power
-  plot_power <- function(z){
+  plot_power <- function(z, type){
     meta <- z$meta
-    z <-  z$pow
+    if (type == 'pow') {
+      z <-  z$pow
+    } else {
+      z <- z$loec
+    }
     z$N <- rep(meta, each = 2)
     z$variable <-  factor(z$variable, unique(z$variable)[1:2], 
                                    labels = c('LM', 'QP'))
@@ -156,7 +189,7 @@ shinyServer(function(input, output) {
       geom_hline(aes(yintercept = 0.8), linetype = 'dotted') +
       # axes
       labs(x = 'N', 
-           y = expression(paste('Power (global test , ', alpha, ' = 0.05)'))) +
+           y = 'Power') +
       # appearance
       mytheme + 
       # legend title
@@ -169,20 +202,6 @@ shinyServer(function(input, output) {
   }
 
 
-  # simulate and analyze
-  res_fun <- function(sims){
-    meta <- sims$meta
-    sims <- sims$sims
-    withProgress(message = '', detail = "N = 0", value = 0, {
-      res <- vector("list", length(sims)) 
-      for (i in seq_along(sims)) {
-        incProgress(1 / length(sims), detail = paste("N = ", meta[i]))
-        res[[i]] <- get_result(sims[[i]])
-      }
-    })
-    out <- list(meta = meta, res = res)
-    return(out)
-  }
 
   
   ### --- design ---------------------------------------------------------------
@@ -191,6 +210,7 @@ shinyServer(function(input, output) {
             theta  = input$theta,
             effsize = input$effsize)
   })
+  
   output$desplot <- renderPlot({
     print(plot_des(desdata()))
   })
@@ -200,6 +220,7 @@ shinyServer(function(input, output) {
     },
   options = list(paging = FALSE, searching = FALSE)
   )
+  
   
   ### --- simulations
   resdata <- eventReactive(input$goButton, {
@@ -213,30 +234,41 @@ shinyServer(function(input, output) {
       )
     })
   
-  get_data <- eventReactive(input$goButton, {
-    pow <- list(pow = ldply(resdata()$res, get_power), meta = resdata()$meta)
-    return(pow)
-  })
-  
   output$powplot <- renderPlot({
-    print(plot_power(get_data()))
+    print(plot_power(resdata(), type = 'pow'))
     })
   
   output$powtable <- renderDataTable({
-    df <- cbind(get_data()$pow, get_data()$meta[rep(seq_along(get_data()$meta), each = 2)])
+    df <- cbind(resdata()$pow, resdata()$meta[rep(seq_along(resdata()$meta), each = 2)])
     df$variable <-  factor(df$variable, unique(df$variable)[1:2], 
-                          labels = c('lm', 'qp'))
+                          labels = c('LM', 'QP'))
     df <- df[ , -4]
     names(df) <- c('Model', 'Power', 'N')
     df[ , c(1, 3, 2)]}, 
     options = list(paging = FALSE, searching = FALSE)
     )
   
-  # Downloads
+  
+  # --- LOEC -----
+  output$loecplot <- renderPlot({
+    print(plot_power(resdata(), type = 'loec'))
+  })
+  
+  output$loectable <- renderDataTable({
+    df <- cbind(resdata()$loec, resdata()$meta[rep(seq_along(resdata()$meta), each = 2)])
+    df$variable <-  factor(df$variable, unique(df$variable)[1:2], 
+                           labels = c('LM', 'QP'))
+    df <- df[ , -4]
+    names(df) <- c('Model', 'Power', 'N')
+    df[ , c(1, 3, 2)]}, 
+    options = list(paging = FALSE, searching = FALSE)
+  )
+  
+  ## --- Downloads -----
   output$downloadData <- downloadHandler(
     filename = function() 'test.csv', 
     content = function(file) {
-      outdata <- cbind(get_data()$pow, get_data()$meta[rep(seq_len(nrow(get_data()$meta)), each = 3), ])
+      outdata <- cbind(get_pow()$pow, get_pow()$meta[rep(seq_len(nrow(get_pow()$meta)), each = 3), ])
       write.csv(outdata, file)
       })
   
@@ -244,7 +276,7 @@ shinyServer(function(input, output) {
     filename = 'plot.pdf',
     content = function(file) {
       pdf(file, width = 9)
-        print(plot_power(get_data()))
+        print(plot_power(get_pow()))
       dev.off()
       })
 })

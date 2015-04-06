@@ -6,4 +6,6 @@ output: html_document
 ---
 
 Power estimation for one factorial designs with count data
-#######
+===========
+
+Demo at http://52.28.43.83/shinypower/
