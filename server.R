@@ -31,12 +31,13 @@ shinyServer(function(input, output) {
     return(data.frame(x = factor(x), y = y))
   }
   #   plot(des_sim(1000, 1000, 4, 0.1))
-  #   df <- des_sim(1000, 1000, 4, 0.1)
+  #   df <- des_sim(1000, 2, 4, 0.1)
 
   plot_des <- function(df) {
     p <- ggplot(df, aes(x = x, y = y)) +
-      geom_jitter(col = 'steelblue', alpha = 0.3) + 
-      geom_boxplot(alpha = 0.6) + 
+      geom_jitter(position = position_jitter(height = 0, width = 0.35), 
+                  col = 'steelblue', alpha = 0.3) + 
+      geom_boxplot(alpha = 0.5) + 
       labs(x = 'Treatment', y = 'Abundance')
     return(p)
   }
