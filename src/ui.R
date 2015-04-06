@@ -8,11 +8,11 @@ shinyUI(navbarPage("Power estimation!",
               # Sidebar with sliders that demonstrate various available options
               sidebarPanel(
                 sliderInput("muc", "Abundance in Control:", value = 10,
-                             min = 0.1, max = 500, step = 5),
-                sliderInput('effsize', 'Abundance in Treatment (as proportion of control):',
-                             value = 0.5, min = 0, max = 1, step = 0.1),
+                             min = 0.1, max = 200, step = 5),
                 sliderInput('theta', 'Theta (=dispersion parameter): ', 
-                            value = 4, min = 0.1, max = 100, step = 0.1)
+                            value = 4, min = 0.1, max = 200, step = 0.1),
+                sliderInput('effsize', 'Abundance in Treatment (as proportion of control):',
+                            value = 0.5, min = 0, max = 1, step = 0.1)
               ),
               
               # Show a table summarizing the values entered
