@@ -48,11 +48,18 @@ shinyUI(navbarPage("Powerapp",
                        )
                      ),
                      mainPanel(
-                       plotOutput("powplot"),
-                       h3("Summary"),
-                       dataTableOutput("powtable"),
-                       downloadButton('downloadData', 'Download dataset'),
-                       downloadButton('downloadPlot', 'Download Plot')
+                       tabsetPanel(
+                         tabPanel("Global test", 
+                           plotOutput("powplot"),
+                           h3("Summary"),
+                           dataTableOutput("powtable"),
+                           downloadButton('downloadData', 'Download dataset'),
+                           downloadButton('downloadPlot', 'Download Plot')
+                         ), 
+                         tabPanel('LOEC', 
+                            h3("Summary")
+                                  )
+                       )
                        )
                      )
                    )
