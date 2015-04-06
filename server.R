@@ -35,7 +35,8 @@ shinyServer(function(input, output) {
 
   plot_des <- function(df) {
     p <- ggplot(df, aes(x = x, y = y)) +
-      geom_boxplot() +
+      geom_jitter(col = 'steelblue', alpha = 0.3) + 
+      geom_boxplot(alpha = 0.6) + 
       labs(x = 'Treatment', y = 'Abundance')
     return(p)
   }
@@ -184,8 +185,8 @@ shinyServer(function(input, output) {
                                    labels = c('LM', 'QP'))
     
     out <- ggplot(z) +
-      geom_line(aes(y = power, x = N, group = variable, linetype = variable)) +
-      geom_point(aes(y = power, x = N, shape = variable), color = 'black', size = 4) +
+      geom_line(aes(y = power, x = N, group = variable, linetype = variable), col = 'steelblue') +
+      geom_point(aes(y = power, x = N, shape = variable), , col = 'steelblue', size = 4) +
       geom_hline(aes(yintercept = 0.8), linetype = 'dotted') +
       # axes
       labs(x = 'N', 
@@ -265,18 +266,45 @@ shinyServer(function(input, output) {
   )
   
   ## --- Downloads -----
-  output$downloadData <- downloadHandler(
-    filename = function() 'test.csv', 
+  output$downloadpowtable <- downloadHandler(
+    filename = 'powtable.csv', 
     content = function(file) {
-      outdata <- cbind(get_pow()$pow, get_pow()$meta[rep(seq_len(nrow(get_pow()$meta)), each = 3), ])
-      write.csv(outdata, file)
+      df <- cbind(resdata()$pow, resdata()$meta[rep(seq_along(resdata()$meta), each = 2)])
+      df$variable <-  factor(df$variable, unique(df$variable)[1:2], 
+                             labels = c('LM', 'QP'))
+      df <- df[ , -4]
+      names(df) <- c('Model', 'Power', 'N')
+      df <- df[ , c(1, 3, 2)]
+      df$type = 'global'
+      write.csv(df, file)
       })
   
-  output$downloadPlot <- downloadHandler(
-    filename = 'plot.pdf',
+  output$downloadpowplot <- downloadHandler(
+    filename = 'powplot.pdf',
     content = function(file) {
       pdf(file, width = 9)
-        print(plot_power(get_pow()))
+      print(plot_power(resdata(), type = 'pow'))
       dev.off()
       })
+  
+  output$downloadloectable <- downloadHandler(
+    filename = function() 'loectable.csv', 
+    content = function(file) {
+      df <- cbind(resdata()$loec, resdata()$meta[rep(seq_along(resdata()$meta), each = 2)])
+      df$variable <-  factor(df$variable, unique(df$variable)[1:2], 
+                             labels = c('LM', 'QP'))
+      df <- df[ , -4]
+      names(df) <- c('Model', 'Power', 'N')
+      df <- df[ , c(1, 3, 2)]
+      df$type = 'loec'
+      write.csv(df, file)
+    })
+  
+  output$downloadpowplot <- downloadHandler(
+    filename = 'loecplot.pdf',
+    content = function(file) {
+      pdf(file, width = 9)
+        print(plot_power(resdata(), type = 'loec'))
+      dev.off()
+    })
 })
