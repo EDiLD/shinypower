@@ -118,7 +118,7 @@ shinyServer(function(input, output) {
       )
       )
     }
-    withProgress(message = 'Analysing simulation', detail = "0", value = 0, {
+    withProgress(message = 'Simulation', detail = "0", value = 0, {
     res <- vector('list', ncol(z$y))
     for (i in seq_len(ncol(z$y))) {
       incProgress(1 / ncol(z$y), detail = i)
@@ -173,10 +173,10 @@ shinyServer(function(input, output) {
   res_fun <- function(sims){
     meta <- sims$meta
     sims <- sims$sims
-    withProgress(message = 'Analysing data', detail = "N = 0", value = 0, {
+    withProgress(message = '', detail = "N = 0", value = 0, {
       res <- vector("list", length(sims)) 
       for (i in seq_along(sims)) {
-        incProgress(1 / length(sims), detail = paste("N = ", i))
+        incProgress(1 / length(sims), detail = paste("N = ", meta[i]))
         res[[i]] <- get_result(sims[[i]])
       }
     })
