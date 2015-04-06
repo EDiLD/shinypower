@@ -2,6 +2,7 @@ library(shiny)
 library(plyr)
 library(reshape2)
 library(multcomp)
+library(MASS)
 library(ggplot2)
 
 shinyServer(function(input, output) {
@@ -34,12 +35,15 @@ shinyServer(function(input, output) {
 
   plot_des <- function(df) {
     p <- ggplot(df, aes(x = x, y = y)) +
-      geom_boxplot()
+      geom_boxplot() +
+      labs(x = 'Treatment', y = 'Abundance')
     return(p)
   }
   
   df_des <- function(df){
-    ddply(df, .(x), summarize, mean = mean(y), variance = var(y))
+    out <- ddply(df, .(x), summarize, mean = mean(y), variance = var(y))
+    names(out)[1] <- 'Treatment'
+    return(out)
   }
   
   ### --- Simulation functions -------------------------------------------------
@@ -222,7 +226,7 @@ shinyServer(function(input, output) {
                           labels = c('lm', 'qp'))
     df <- df[ , -4]
     names(df) <- c('Model', 'Power', 'N')
-    df}, 
+    df[ , c(1, 3, 2)]}, 
     options = list(paging = FALSE, searching = FALSE)
     )
   
@@ -237,8 +241,8 @@ shinyServer(function(input, output) {
   output$downloadPlot <- downloadHandler(
     filename = 'plot.pdf',
     content = function(file) {
-      pdf(file)
-      print(plot_power(get_data()))
+      pdf(file, width = 9)
+        print(plot_power(get_data()))
       dev.off()
       })
 })

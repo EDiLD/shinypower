@@ -17,12 +17,20 @@ shinyUI(navbarPage("Powerapp",
               
               # Show a table summarizing the values entered
               mainPanel(
-                plotOutput("desplot"),
-                dataTableOutput("destab")
+                tabsetPanel(
+                  tabPanel('Readme', 
+                    includeMarkdown("md/design.md")
+                    ),
+                  tabPanel('Summary', 
+                    plotOutput("desplot"),
+                    h3("Summary"), 
+                    dataTableOutput("destab")
+                  )
+                )
               )
             )
           ), 
-          tabPanel("Power",
+          tabPanel("Powerestimation",
                    sidebarLayout(
                      sidebarPanel(
                        sliderInput("nsims", "Number of simulations:", 
@@ -33,6 +41,7 @@ shinyUI(navbarPage("Powerapp",
                      ),
                      mainPanel(
                        plotOutput("powplot"),
+                       h3("Summary"),
                        dataTableOutput("powtable"),
                        downloadButton('downloadData', 'Download dataset'),
                        downloadButton('downloadPlot', 'Download Plot')
