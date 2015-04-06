@@ -1,6 +1,6 @@
-# Design
+### Design
 
-## Description
+#### Description
 Data are simulated from a one factorial design with 4 treatments.
 
 Abundances are drawn from a negative binomial distribution ($NB(\mu, \kappa)$) with mean = $\mu$ and variance = $\mu + \mu^2 / \kappa$.
@@ -11,11 +11,11 @@ $\kappa$ is equal between treatments.
 Therefore, the LOEC is at treatment 3 and NOEC a treatment 2.
 
 
-## Controls
+#### Controls
 $\mu_c$, $\kappa$ and r can be controlled by the sliders on the left.
 
 
 
-## Output
+#### Output
 
 The summary tab gives a graphical representation (assuming a sample size of 1000) and also mean and variances per treatment.
