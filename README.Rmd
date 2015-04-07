@@ -9,3 +9,14 @@ Power estimation for one factorial designs with count data
 ===========
 
 Demo at http://52.28.43.83/shinypower/
+
+
+
+TODO:
+Add histogramm of LOECs assigned.
+Williams test switch?
+one-sided / two-sided
+
+Navbar -> choose between apps (power, population, prc, etc...)
+sidebar -> readme, 2 tabs for settings
+mainpanel -> 3 tabs for output

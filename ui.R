@@ -1,8 +1,9 @@
 library(shiny)
+library(shinythemes)
 library(ggplot2)
 
 # Define UI for slider demo application
-shinyUI(navbarPage("shinytox",
+shinyUI(navbarPage("shinytox", theme = shinytheme("united"), 
           tabPanel("Power",
             sidebarLayout(
               sidebarPanel(
@@ -25,11 +26,12 @@ shinyUI(navbarPage("shinytox",
                            textInput('N', 'Sample sizes (separated by comma or space; up to 5 entries): ',
                                      '3, 6, 9'),
                            selectInput("mct", "MCT:", 
-                                       choices = c('Dunnett'='Dunnett','Williams'='Williams')),
+                                       choices = c('Dunnett' = 'Dunnett',
+                                                   'Williams' = 'Williams')),
                            selectInput("alt", "Alternative:", 
-                                       choices = c('two.sided'='two.sided',
-                                                   'greater'='greater',
-                                                   'less'='less')),
+                                       choices = c('two.sided' = 'two.sided',
+                                                   'greater' = 'greater',
+                                                   'less' = 'less')),
                            actionButton("goButton", "Run Simulation!")
                            ), 
                   tabPanel('Readme', 
@@ -41,11 +43,6 @@ shinyUI(navbarPage("shinytox",
               )),
               mainPanel(
                 tabsetPanel(
-                  tabPanel('Design',
-                    plotOutput("desplot"),
-                    h3("Summary"), 
-                    dataTableOutput("destab")
-                    ), 
                   tabPanel("Global test", 
                    plotOutput("powplot"),
                    h3("Summary"),
@@ -59,7 +56,12 @@ shinyUI(navbarPage("shinytox",
                    dataTableOutput("loectable"),
                    downloadButton('downloadloectable', 'Download table'),
                    downloadButton('downloadloecplot', 'Download plot')
-                   )
+                   ),
+                  tabPanel('Design',
+                           plotOutput("desplot"),
+                           h3("Summary"), 
+                           dataTableOutput("destab")
+                  )
                 )
               )
             )
@@ -67,27 +69,72 @@ shinyUI(navbarPage("shinytox",
           tabPanel("Community - PRC",
                    sidebarLayout(
                      sidebarPanel(
-                       
+                       tabsetPanel(
+                         tabPanel('Data'
+                                  ),
+                         tabPanel('Transformation'
+                                  ),
+                         tabPanel('Settings'
+                                  ),
+                         tabPanel('README'
+                                  )
+                       )
                      ),
                      mainPanel(
-                       
+                       tabsetPanel(
+                         tabPanel('Plot'
+                         ),
+                         tabPanel('Summary'
+                         ),
+                         tabPanel('Tests'
+                         ),
+                         tabPanel('Summary (per sampling)'
+                         ),
+                         tabPanel('Tests (per sampling)'
+                         )
+                       )
                      )
                      )
           ),
           tabPanel("Community - GLM",
                    sidebarLayout(
                      sidebarPanel(
-                       
+                       tabsetPanel(
+                         tabPanel('Data'
+                         ),
+                         tabPanel('Settings'
+                         ),
+                         tabPanel('README'
+                         )
+                       )
                      ),
                      mainPanel(
-                       
+                       tabsetPanel(
+                         tabPanel('Plot'
+                         ),
+                         tabPanel('Summary'
+                         ),
+                         tabPanel('Tests'
+                         ),
+                         tabPanel('Summary (per sampling)'
+                         ),
+                         tabPanel('Tests (per sampling)'
+                         )
+                       )
                      )
                    )
           ),
           tabPanel("Population",
                    sidebarLayout(
                      sidebarPanel(
-                       
+                       tabsetPanel(
+                         tabPanel('Data'
+                         ),
+                         tabPanel('Settings'
+                         ),
+                         tabPanel('README'
+                         )
+                       )
                      ),
                      mainPanel(
                        
