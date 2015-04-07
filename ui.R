@@ -3,7 +3,7 @@ library(shinythemes)
 library(ggplot2)
 
 # Define UI for slider demo application
-shinyUI(navbarPage("shinytox", theme = shinytheme("united"), 
+shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"), 
           tabPanel("Power",
             sidebarLayout(
               sidebarPanel(
