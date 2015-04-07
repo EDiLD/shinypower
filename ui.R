@@ -50,15 +50,15 @@ shinyUI(navbarPage("shinytox",
                    plotOutput("powplot"),
                    h3("Summary"),
                    dataTableOutput("powtable"),
-                   downloadButton('downloadpowtable', 'Download dataset'),
-                   downloadButton('downloadpowplot', 'Download Plot')
+                   downloadButton('downloadpowtable', 'Download table'),
+                   downloadButton('downloadpowplot', 'Download plot')
                    ), 
                   tabPanel('LOEC', 
                    plotOutput("loecplot"),
                    h3("Summary"),
                    dataTableOutput("loectable"),
-                   downloadButton('downloadloectable', 'Download dataset'),
-                   downloadButton('downloadloecplot', 'Download Plot')
+                   downloadButton('downloadloectable', 'Download table'),
+                   downloadButton('downloadloecplot', 'Download plot')
                    )
                 )
               )
