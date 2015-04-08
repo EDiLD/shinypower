@@ -14,7 +14,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                                          type = 'text/javascript')
                              ),
                            sliderInput("muc", HTML("$$\\text{Abundance in Control } (\\mu_C)$$"), value = 10,
-                                       min = 0.5, max = 200, step = 5),
+                                       min = 0.5, max = 200, step = 2),
                            sliderInput('theta', '$$\\text{Dispersion} (\\kappa)$$ ', 
                                        value = 4, min = 0.1, max = 200, step = 0.1),
                            sliderInput('effsize', 'Reduction in treatment (r)',
@@ -57,7 +57,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                    downloadButton('downloadloectable', 'Download table'),
                    downloadButton('downloadloecplot', 'Download plot')
                    ),
-                  tabPanel('Design',
+                  tabPanel('Simulation-Design',
                            plotOutput("desplot"),
                            h3("Summary"), 
                            dataTableOutput("destab")
@@ -124,7 +124,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                      )
                    )
           ),
-          tabPanel("Population",
+          tabPanel("Population-GLM",
                    sidebarLayout(
                      sidebarPanel(
                        tabsetPanel(

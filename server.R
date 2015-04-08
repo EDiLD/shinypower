@@ -8,12 +8,12 @@ library(ggplot2)
 shinyServer(function(input, output) {
   ## --- Shiny functions -------------------------------------------------------
   # ggplot2 theme
-  mytheme <- theme_gray(base_size = 12, base_family = "Helvetica") + 
+  mytheme <- theme_gray(base_size = 20, base_family = "Helvetica") + 
     theme(
-          text = element_text(size = 14),
-          axis.text = element_text(size = 12),
-          axis.title.x = element_text(size = 14, face = "bold", vjust = 0),
-          axis.title.y = element_text(size = 14, face = "bold", vjust = 1),
+          text = element_text(size = 18),
+          axis.text = element_text(size = 16),
+          axis.title.x = element_text(size = 18, face = "bold", vjust = 0),
+          axis.title.y = element_text(size = 18, face = "bold", vjust = 1),
           legend.key = element_blank())
   
   # parse textInput
@@ -38,7 +38,8 @@ shinyServer(function(input, output) {
       geom_jitter(position = position_jitter(height = 0, width = 0.35), 
                   col = 'steelblue', alpha = 0.3) + 
       geom_boxplot(alpha = 0.5) + 
-      labs(x = 'Treatment', y = 'Abundance')
+      labs(x = 'Treatment', y = 'Abundance') +
+      mytheme
     return(p)
   }
   
