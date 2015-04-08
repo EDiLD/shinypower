@@ -8,7 +8,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
             sidebarLayout(
               sidebarPanel(
                 tabsetPanel(
-                  tabPanel('Effects',
+                  tabPanel('Settings-Effects',
                            tags$head(
                              tags$script(src = "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full", 
                                          type = 'text/javascript')
@@ -21,7 +21,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                                        value = 0.5, min = 0, max = 1, step = 0.1),
                            actionButton("goButton", "Run Simulation!")
                            ), 
-                  tabPanel('Simulations',
+                  tabPanel('Settings-Simulation',
                            sliderInput("nsims", "Number of simulations:", 
                                        min = 50, max = 250, value = 50, step = 50),
                            textInput('N', 'Sample sizes (separated by comma or space; up to 5 entries): ',
