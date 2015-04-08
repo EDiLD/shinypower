@@ -18,7 +18,8 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                            sliderInput('theta', '$$\\text{Dispersion} (\\kappa)$$ ', 
                                        value = 4, min = 0.1, max = 200, step = 0.1),
                            sliderInput('effsize', 'Reduction in treatment (r)',
-                                       value = 0.5, min = 0, max = 1, step = 0.1)
+                                       value = 0.5, min = 0, max = 1, step = 0.1),
+                           actionButton("goButton", "Run Simulation!")
                            ), 
                   tabPanel('Simulations',
                            sliderInput("nsims", "Number of simulations:", 

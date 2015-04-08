@@ -246,7 +246,7 @@ shinyServer(function(input, output) {
                           labels = c('LM', 'QP'))
     df <- df[ , -4]
     names(df) <- c('Model', 'Power', 'N')
-    df[ , c(1, 3, 2)]}, 
+    df[order(df$Model, df$N), c(1, 3, 2)]}, 
     options = list(paging = FALSE, searching = FALSE)
     )
   
@@ -262,7 +262,7 @@ shinyServer(function(input, output) {
                            labels = c('LM', 'QP'))
     df <- df[ , -4]
     names(df) <- c('Model', 'Power', 'N')
-    df[ , c(1, 3, 2)]}, 
+    df[order(df$Model, df$N), c(1, 3, 2)]}, 
     options = list(paging = FALSE, searching = FALSE)
   )
   
