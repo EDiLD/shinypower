@@ -32,8 +32,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                            selectInput("alt", "Alternative:", 
                                        choices = c('two.sided' = 'two.sided',
                                                    'greater' = 'greater',
-                                                   'less' = 'less')),
-                           actionButton("goButton", "Run Simulation!")
+                                                   'less' = 'less'))
                            ), 
                   tabPanel('Readme', 
                            includeMarkdown("md/design.md")
