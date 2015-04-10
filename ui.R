@@ -19,6 +19,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                                        value = 4, min = 0.1, max = 200, step = 0.1),
                            sliderInput('effsize', 'Reduction in treatment (r)',
                                        value = 0.5, min = 0, max = 1, step = 0.1),
+                           p("See `Simulation-Design` tab for a live graphical representation of the simulated data."),
                            actionButton("goButton", "Run Simulation!")
                            ), 
                   tabPanel('Settings-Simulation',
@@ -26,10 +27,10 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                                        min = 50, max = 250, value = 50, step = 50),
                            textInput('N', 'Sample sizes (separated by comma or space; up to 5 entries): ',
                                      '3, 6, 9'),
-                           selectInput("mct", "MCT:", 
+                           selectInput("mct", "MCT (currently not implemented):", 
                                        choices = c('Dunnett' = 'Dunnett',
                                                    'Williams' = 'Williams')),
-                           selectInput("alt", "Alternative:", 
+                           selectInput("alt", "Hypothesis (currently not implemented):", 
                                        choices = c('two.sided' = 'two.sided',
                                                    'greater' = 'greater',
                                                    'less' = 'less'))
@@ -110,6 +111,8 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                      ),
                      mainPanel(
                        tabsetPanel(
+                         tabPanel('Diagnostics'
+                         ),
                          tabPanel('Plot'
                          ),
                          tabPanel('Summary'
@@ -137,7 +140,14 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                        )
                      ),
                      mainPanel(
-                       
+                       tabsetPanel(
+                         tabPanel('Diagnostics'
+                         ),
+                         tabPanel('Summary'
+                         ),
+                         tabPanel('Effect Class'
+                         )
+                       )
                      )
                    )
           )
