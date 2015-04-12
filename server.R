@@ -77,7 +77,7 @@ shinyServer(function(input, output) {
 
   # compare methods
   get_result <- function(z, alt, mct){
-    ana <- function(y, x, alt){
+    ana <- function(y, x, alt, mct){
       # -------------
       # Transformations
       # ln(ax + 1) transformation
@@ -124,7 +124,7 @@ shinyServer(function(input, output) {
     res <- vector('list', ncol(z$y))
     for (i in seq_len(ncol(z$y))) {
       incProgress(1 / ncol(z$y), detail = i)
-      res[[i]] <- ana(z$y[ , i], z$x)
+      res[[i]] <- ana(z$y[ , i], z$x, alt, mct)
     }
     })
     return(res)
@@ -157,14 +157,14 @@ shinyServer(function(input, output) {
   # get_loec(res1)
   # 
   # simulate and analyze
-  res_fun <- function(sims){
+  res_fun <- function(sims, alt, mct){
     meta <- sims$meta
     sims <- sims$sims
     withProgress(message = '', detail = "N = 0", value = 0, {
       res <- vector("list", length(sims)) 
       for (i in seq_along(sims)) {
         incProgress(1 / length(sims), detail = paste("N = ", meta[i]))
-        res[[i]] <- get_result(sims[[i]])
+        res[[i]] <- get_result(sims[[i]], alt, mct)
       }
     })
     pow <- ldply(res, get_power)
@@ -233,7 +233,9 @@ shinyServer(function(input, output) {
                          nsims = input$nsims,
                          theta  = input$theta,
                          effsize = input$effsize
-              )
+              ), 
+      alt = input$alt,
+      mct = input$mct
       )
     })
   
