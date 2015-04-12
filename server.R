@@ -76,8 +76,8 @@ shinyServer(function(input, output) {
   # sims <- sim_fun(c(5,4), 100, 4, 0.1, 100)
 
   # compare methods
-  get_result <- function(z){
-    ana <- function(y, x){
+  get_result <- function(z, alt, mct){
+    ana <- function(y, x, alt){
       # -------------
       # Transformations
       # ln(ax + 1) transformation
@@ -101,14 +101,14 @@ shinyServer(function(input, output) {
       
       # ----------------
       # LOEC
-      mc_lm <- summary(glht(modlm, linfct = mcp(x = 'Dunnett'),  
-                            alternative = 'less'), test = adjusted('holm'))$test$pvalues
+      mc_lm <- summary(glht(modlm, linfct = mcp(x = mct),  
+                            alternative = alt), test = adjusted('holm'))$test$pvalues
       suppressWarnings( # intended warnings about no min -> no LOEC
         loeclm <- min(which(mc_lm < 0.05))
       )
       # quasi
-      mc_qglm <- summary(glht(modqglm, linfct = mcp(x = 'Dunnett'),  
-                              alternative = 'less'), test = adjusted('holm'))$test$pvalues
+      mc_qglm <- summary(glht(modqglm, linfct = mcp(x = mct),  
+                              alternative = alt), test = adjusted('holm'))$test$pvalues
       suppressWarnings( # intended warnings about no min -> no LOEC
         loecqglm <- min(which(mc_qglm < 0.05))
       ) 
@@ -309,4 +309,9 @@ shinyServer(function(input, output) {
         print(plot_power(resdata(), type = 'loec'))
       dev.off()
     })
+  
+#   output$test <- renderText({ 
+#     input$mct
+#   })
+  
 })
