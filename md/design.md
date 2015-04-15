@@ -10,7 +10,8 @@ $\kappa$ is a dispersion parameter:
 
 
 Data are simulated for a one factorial design with 4 treatments and a step effect between treatments 2 and 3:
-Abundance in in treatments 1 + 2 are draw from $NB(\mu_c, \kappa)$, whereas the mean abundance in treatments 3 + 4 are reduced by factor $r$: $NB(r \times \mu_c, \kappa)$.
+Abundance in in treatments 1 + 2 are draw from $NB(\mu_c, \kappa)$, whereas the mean abundance in treatments 3 + 4 are reduced by factor $r$: $NB(r \times \mu_c, \kappa)$. 
+Therefore, the LOEC is at treatment 3 and NOEC at treatment 2.
 Note, that $\kappa$ is equal between treatments.
 
 $\mu_c$, $\kappa$ and $r$ can be controlled by the sliders (under effects).
