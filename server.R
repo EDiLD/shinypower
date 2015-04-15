@@ -5,7 +5,7 @@ library(multcomp)
 library(MASS)
 library(ggplot2)
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   ## --- Shiny functions -------------------------------------------------------
   # ggplot2 theme
   mytheme <- theme_gray(base_size = 20, base_family = "Helvetica") + 
@@ -102,15 +102,25 @@ shinyServer(function(input, output) {
       # ----------------
       # LOEC
       mc_lm <- summary(glht(modlm, linfct = mcp(x = mct),  
-                            alternative = alt), test = adjusted('holm'))$test$pvalues
+                            alternative = alt), 
+                       test = adjusted('holm'))$test$pvalues
       suppressWarnings( # intended warnings about no min -> no LOEC
-        loeclm <- min(which(mc_lm < 0.05))
+        if (mct == 'Dunnett') {
+          loeclm <- min(which(mc_lm < 0.05))
+        } else {
+          loeclm <- max(which(mc_lm < 0.05))
+        }
       )
       # quasi
       mc_qglm <- summary(glht(modqglm, linfct = mcp(x = mct),  
-                              alternative = alt), test = adjusted('holm'))$test$pvalues
+                              alternative = alt), 
+                         test = adjusted('holm'))$test$pvalues
       suppressWarnings( # intended warnings about no min -> no LOEC
-        loecqglm <- min(which(mc_qglm < 0.05))
+        if (mct == 'Dunnett') {
+          loecqglm <- min(which(mc_qglm < 0.05))
+        } else {
+          loecqglm <- max(which(mc_qglm < 0.05))
+        }
       ) 
       
       # ---------
@@ -130,6 +140,8 @@ shinyServer(function(input, output) {
     return(res)
   }
   # res1 <- get_result(sims$sims[[1]])
+  # res1 <- get_result(sims$sims[[1]], alt = 'less', mct = 'Dunnett')
+  # res1 <- get_result(sims$sims[[1]], alt = 'less', mct = 'Williams')
   
   # exract power
   get_power <- function(z){ 
@@ -144,18 +156,19 @@ shinyServer(function(input, output) {
   }
   # z <- ldply(res2$res, get_loec)
   #  z <- list(pow = ldply(res2$res, get_power), meta = res2$meta)
-  get_loec <- function(z){
+  get_loec <- function(z, mct){
     take <- c("loeclm", "loecqglm")
     loecs <- ldply(z, function(w) as.numeric(unlist(w[take])))
     names(loecs) <- take
     loecs <- melt(loecs)
-    out <- ddply(loecs, .(variable), summarize,
-                 power = sum(value == 2, na.rm = TRUE) / sum(!is.na(value))
-    )
+    out <- melt(tapply(loecs$value, loecs$variable, function(x){
+      power = sum(x == 2, na.rm = TRUE) / sum(!is.na(x))
+    }), varnames = 'variable', value.name = 'power')
     return(out)
   }
-  # get_loec(res1)
-  # 
+  # get_loec(res1, mct = 'Dunnett')
+  # get_loec(res1, mct = 'Williams')
+
   # simulate and analyze
   res_fun <- function(sims, alt, mct){
     meta <- sims$meta
@@ -168,7 +181,7 @@ shinyServer(function(input, output) {
       }
     })
     pow <- ldply(res, get_power)
-    loec <- ldply(res, get_loec)
+    loec <- ldply(res, get_loec, mct)
     out <- list(meta = meta, pow = pow, loec = loec)
     return(out)
   }
@@ -187,8 +200,10 @@ shinyServer(function(input, output) {
                                    labels = c('LM', 'QP'))
     
     out <- ggplot(z) +
-      geom_line(aes(y = power, x = N, group = variable, linetype = variable), col = 'steelblue') +
-      geom_point(aes(y = power, x = N, shape = variable), , col = 'steelblue', size = 4) +
+      geom_line(aes(y = power, x = N, group = variable, linetype = variable), 
+                col = 'steelblue') +
+      geom_point(aes(y = power, x = N, shape = variable),
+                 col = 'steelblue', size = 4) +
       geom_hline(aes(yintercept = 0.8), linetype = 'dotted') +
       # axes
       labs(x = 'N', 
@@ -226,6 +241,20 @@ shinyServer(function(input, output) {
   
   
   ### --- simulations
+  # switch to Global test tab if button is pushed
+  observe({
+    if (input$goButton > 0)
+      updateTabsetPanel(session, inputId = "main", selected = "gt")
+  })
+  
+  # switch to simualtion design tab if sims input are changed
+  observe({
+      input$muc
+      input$nsims
+      input$theta
+      updateTabsetPanel(session, inputId = "main", selected = "sd")
+  })
+  
   resdata <- eventReactive(input$goButton, {
     res_fun(
       sim_fun(N = numextractall(input$N),
