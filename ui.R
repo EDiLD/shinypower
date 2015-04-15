@@ -36,7 +36,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                                            selectInput("mct", "Multiple comparison contrasts:", 
                                                        choices = c('Dunnett contrasts' = 'Dunnett')),
                                            selectInput("alt", "Hypothesis:", 
-                                                       choices = c('one sided - decrease' = 'less',
+                                                       choices = c('one sided' = 'less',
                                                                    'two sided' = 'two.sided'))
                                           )
                              ),
