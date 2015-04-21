@@ -1,0 +1,2 @@
+Written by [Eduard Szöcs](http://edild.github.io/).
+Source Code is [here](https://github.com/EDiLD/shinypower).

@@ -45,6 +45,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
               mainPanel(
                 tabsetPanel(id='main', 
                   tabPanel('Simulation-Design',  value='sd',
+                           p("1000 draws from the specified design:"),
                            plotOutput("desplot"),
                            h3("Summary"), 
                            dataTableOutput("destab")
@@ -65,7 +66,7 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                    downloadButton('downloadloecplot', 'Download plot')
                    ),
                   tabPanel('Readme', value = 'rm',
-                           includeMarkdown("md/design.md")
+                           includeMarkdown("md/README_power.md")
                   )
                 )
               )
