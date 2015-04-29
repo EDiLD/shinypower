@@ -155,5 +155,8 @@ shinyUI(navbarPage("shinytox (alpha)", theme = shinytheme("united"),
                        )
                      )
                    )
+          ),
+          tabPanel("About"
+                  
           )
 ))
